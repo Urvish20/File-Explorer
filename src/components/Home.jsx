@@ -3,24 +3,26 @@ import { AiFillDelete } from "react-icons/ai";
 import { useState } from "react";
 
 const Home = () => {
-
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [isCreatingFile, setIsCreatingFile] = useState(false);
   const [newName, setNewName] = useState("");
-  const [folders, setFolders] = useState([]);
-  const [files, setFiles] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(null);
+  const [data, setData] = useState({
+    id: "1",
+    name: "root",
+    children: [],
+  });
+  const [activeFolder, setActiveFolder] = useState(null);
 
-  const handleCreateSubfolder = (index) => {
+  const handleCreateSubfolder = (folder) => {
     setIsCreatingFolder(true);
     setIsCreatingFile(false);
-    setActiveIndex(index);
+    setActiveFolder(folder);
   };
 
-  const handleCreateSubfile = (index) => {
+  const handleCreateSubfile = (folder) => {
     setIsCreatingFile(true);
     setIsCreatingFolder(false);
-    setActiveIndex(index);
+    setActiveFolder(folder);
   };
 
   const handleInputChange = (e) => {
@@ -29,135 +31,71 @@ const Home = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isCreatingFolder) {
-      setFolders([...folders, newName]);
-    } else if (isCreatingFile) {
-      setFiles([...files, newName]);
-    }
+    if (!newName) return;
+
+    const newItem = {
+      id: Date.now().toString(),
+      name: newName,
+      children: isCreatingFolder ? [] : undefined, 
+    };
+
+    const newData = { ...data };
+
+    activeFolder.children.push(newItem);
+
+    setData(newData);
     setNewName("");
     setIsCreatingFolder(false);
     setIsCreatingFile(false);
   };
 
-  const handleFolderClick = () => {
-    setIsCreatingFolder(false);
-    setIsCreatingFile(false);
+  const renderTree = (node, level = 0) => {
+    return (
+      <div key={node.id} style={{ marginLeft: level * 20 + 'px' }}>
+        <div className="flex border rounded-lg justify-between bg-[#222E3E] items-center w-[400px] p-3 mt-2">
+          <div className="flex items-center gap-3 text-white cursor-pointer" onClick={() => setActiveFolder(node)}>
+            {node.children ? <FaFolderPlus /> : <FaFileMedical />}
+            <h4>{node.name}</h4>
+          </div>
+          <div className="flex gap-2 text-[#A4ADBA]">
+            {node.children && (
+              <>
+                <FaFolderPlus onClick={() => handleCreateSubfolder(node)} />
+                <FaFileMedical onClick={() => handleCreateSubfile(node)} />
+              </>
+            )}
+            <FaEdit />
+            <AiFillDelete />
+          </div>
+        </div>
+
+        {activeFolder === node && (isCreatingFolder || isCreatingFile) && (
+          <form onSubmit={handleSubmit} className="ml-5">
+            <div className="flex gap-2 items-center w-[400px] p-3 mt-2">
+              <div className="flex items-center gap-1 text-lg">
+                {isCreatingFolder ? <FaFolderPlus /> : <FaFileMedical />}
+              </div>
+              <input
+                type="text"
+                placeholder={isCreatingFolder ? "New folder name" : "New file name"}
+                value={newName}
+                onChange={handleInputChange}
+                className="focus:outline-none border rounded-lg bg-white px-2"
+                autoFocus
+              />
+            </div>
+          </form>
+        )}
+
+        {node.children && node.children.map((child) => renderTree(child, level + 1))}
+      </div>
+    );
   };
 
   return (
     <div className="ml-[100px] mt-9">
-      <h1 className="flex item-center justify-center text-3xl">
-        Explore this file explorer
-      </h1>
-
-      <div className="flex border rounded-lg justify-between bg-[#222E3E] items-center w-[400px] p-3 mt-8">
-        <div className="flex items-center gap-3 text-white text-xl">
-          <FaFolderPlus />
-          <h4>Root</h4>
-        </div>
-        <div className="flex gap-2 text-[#A4ADBA] cursor-pointer text-xl">
-          <FaFolderPlus onClick={() => handleCreateSubfolder("root")} />
-          <FaFileMedical onClick={() => handleCreateSubfile("root")} />
-          <FaEdit />
-          <AiFillDelete />
-        </div>
-      </div>
-
-      {activeIndex === "root" && (isCreatingFolder || isCreatingFile) ? (
-        <form onSubmit={handleSubmit}>
-          <div className="flex gap-2 items-center w-[400px] p-3 ml-5 mt-2">
-            <div className="flex items-center gap-1 text-lg">
-              {isCreatingFolder ? <FaFolderPlus /> : <FaFileMedical />}
-            </div>
-            <input
-              type="text"
-              placeholder={isCreatingFolder ? "New folder name" : "New file name"}
-              value={newName}
-              onChange={handleInputChange}
-              className="focus:outline-none border rounded-lg bg-white px-2"
-              autoFocus
-            />
-            <button type="submit" className="hidden">Submit</button>
-          </div>
-        </form>
-      ) : null}
-
-      <div>
-        {folders.map((folderName, index) => (
-          <div key={`folder-${index}`}>
-            <div
-              className="flex border rounded-lg justify-between bg-[#222E3E] items-center w-[400px] p-3 ml-5 mt-2"
-            >
-              <div
-                className="flex items-center gap-3 text-white"
-                onClick={() => handleFolderClick(folderName)}
-              >
-                <FaFolderPlus />
-                <h4>{folderName}</h4>
-              </div>
-              <div className="flex gap-2 text-[#A4ADBA] cursor-pointer">
-                <FaFolderPlus onClick={() => handleCreateSubfolder(index)} />
-                <FaFileMedical onClick={() => handleCreateSubfile(index)} />
-                <FaEdit />
-                <AiFillDelete />
-              </div>
-            </div>
-            {activeIndex === index && (isCreatingFolder || isCreatingFile) ? (
-              <form onSubmit={handleSubmit}>
-                <div className="flex gap-2 items-center w-[400px] p-3 ml-5 mt-2">
-                  <div className="flex items-center gap-1 text-lg">
-                    {isCreatingFolder ? <FaFolderPlus /> : <FaFileMedical />}
-                  </div>
-                  <input
-                    type="text"
-                    placeholder={isCreatingFolder ? "New folder name" : "New file name"}
-                    value={newName}
-                    onChange={handleInputChange}
-                    className="focus:outline-none border rounded-lg bg-white px-2"
-                    autoFocus
-                  />
-                  <button type="submit" className="hidden">Submit</button>
-                </div>
-              </form>
-            ) : null}
-          </div>
-        ))}
-
-        {files.map((fileName, index) => (
-          <div key={`file-${index}`}>
-            <div className="flex border rounded-lg justify-between bg-[#222E3E] items-center w-[400px] p-3 ml-5 mt-2">
-              <div className="flex items-center gap-3 text-white">
-                <FaFileMedical />
-                <h4>{fileName}</h4>
-              </div>
-              <div className="flex gap-2 text-[#A4ADBA] cursor-pointer">
-                <FaEdit />
-                <AiFillDelete />
-              </div>
-            </div>
-            {activeIndex === index && (isCreatingFolder || isCreatingFile) ? (
-              <form onSubmit={handleSubmit}>
-                <div className="flex gap-2 items-center w-[400px] p-3 ml-5 mt-2">
-                  <div className="flex items-center gap-1 text-lg">
-                    {isCreatingFolder ? <FaFolderPlus /> : <FaFileMedical />}
-                  </div>
-                  <input
-                    type="text"
-                    placeholder={isCreatingFolder ? "New folder name" : "New file name"}
-                    value={newName}
-                    onChange={handleInputChange}
-                    className="focus:outline-none border rounded-lg bg-white px-2"
-                    autoFocus
-                  />
-                  <button type="submit" className="hidden">Submit</button>
-                </div>
-              </form>  
-            ) : null}
-          </div>
-        ))}
-      </div>
-
-      <div></div>
+      <h1 className="flex item-center justify-center text-3xl">Explore this file explorer</h1>
+      <div>{renderTree(data)}</div>
     </div>
   );
 };
