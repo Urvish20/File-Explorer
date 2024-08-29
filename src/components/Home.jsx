@@ -9,7 +9,7 @@ const Home = () => {
   const [toggle , setToggle] = useState(false)
   const [newName, setNewName] = useState("");
   const [data, setData] = useState({
-    id: "1",
+    id: 1,
     name: "root",
     children: [],
   });
@@ -32,12 +32,14 @@ const Home = () => {
   };
 
   const handleEdit = (node) => {
-    setToggle(true)
-    setIsEditing(true)
-    setIsCreatingFile(false);
-    setIsCreatingFolder(false);
-    setNewName(node.name);
-    setActiveFolder(node)
+    if(node.id !== 1){
+      setToggle(true)
+      setIsEditing(true)
+      setIsCreatingFile(false);
+      setIsCreatingFolder(false);
+      setNewName(node.name);
+      setActiveFolder(node)
+    }
  }
   
   const handleDelete = (id) => {
@@ -58,7 +60,7 @@ const Home = () => {
       e.preventDefault();
       if (!newName) return;
       const rename = (node, newName) => {
-        if (activeFolder.id === node.id) {
+        if (activeFolder.id === node.id ) {
           node.name = newName;
         } else if (node.children) {
           node.children.forEach(child => rename(child, newName));
