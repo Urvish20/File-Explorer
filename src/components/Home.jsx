@@ -3,6 +3,7 @@ import { AiFillDelete } from "react-icons/ai";
 import { useState } from "react";
 
 const Home = () => {
+
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [isCreatingFile, setIsCreatingFile] = useState(false);
   const [isEditing , setIsEditing] = useState(false)
@@ -13,17 +14,27 @@ const Home = () => {
     name: "root",
     children: [],
   });
+
+  // console.log(data)
+
   const [activeFolder, setActiveFolder] = useState(null);
 
   const handleCreateSubfolder = (folder) => {
     setIsCreatingFolder(true);
     setIsCreatingFile(false);
+    setToggle(false)
+    setIsEditing(false)
+    setNewName("");
     setActiveFolder(folder);
   };
+
 
   const handleCreateSubfile = (folder) => {
     setIsCreatingFile(true);
     setIsCreatingFolder(false);
+    setIsEditing(false)
+    setToggle(false)
+    setNewName("");
     setActiveFolder(folder);
   };
 
@@ -49,16 +60,15 @@ const Home = () => {
         node.children.forEach(deleteItem);
       }
     };
-  
     const newData = { ...data };
     deleteItem(newData);
     setData(newData);
   };
   
-
     const handleSubmit = (e) => {
       e.preventDefault();
       if (!newName) return;
+
       const rename = (node, newName) => {
         if (activeFolder.id === node.id ) {
           node.name = newName;
@@ -75,7 +85,7 @@ const Home = () => {
        setIsCreatingFile(false);
        setIsEditing(false)
        setToggle(false)
-       console.log(toggle)
+      //  console.log(toggle)
       } else {
 
         const newItem = {
@@ -86,12 +96,16 @@ const Home = () => {
     
         const newData = {...data}
         
+        console.log({...data})
+
         activeFolder.children.push(newItem);
     
-        setData(newData)
+        setData(newData)  
         setNewName("");
         setIsCreatingFolder(false);
         setIsCreatingFile(false);
+
+        console.log({...data})
       }
     };
 
